@@ -1,2 +1,5 @@
 theme: jekyll-theme-architect
 title: Diego Ricciotti 
+<script type="text/javascript" src="processing.js"></script>
+
+<canvas data-processing-sources="PolarCurvesTracing.pde"></canvas>
