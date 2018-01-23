@@ -1,0 +1,242 @@
+PVector O, C;//origin of the polar axes, cartesian axes
+float t = 0;
+float increment = 0.003;// increment for drawing the curve
+int radiusPoint = 6;
+int screenWidth = 1280; 
+int screenHeight = 720;
+float x, y; // equation of curve polar
+float xC, yC; //equation of curve cartesian
+int scaleRadius = 100;// radius for the curves
+PolarCurvesList curve;
+
+String[] name = {"cardioid", "circleX", "circleY", "limacon", "spiral", "flower3", "flower7", "flowerX"};
+PFont f;//to display Strings on screen
+int whichCurve = -1;//no curve selected
+
+//I had to make them global bc otherwise I can't pass them to mousePressed
+//If need to change screen size, do it both here and in the setup 
+float padding = screenHeight/20;
+float buttonWidth = screenWidth / 10;
+float buttonHeight = screenHeight / 15;
+
+boolean overButton = false;
+
+void setup() {
+  size(1280, 720);
+
+  background(0);
+  f = createFont("Arial", 16, true); // Arial, 16 point, anti-aliasing on
+  drawButtons(255, -1);//color white
+  O = new PVector(width-width/4, height/2);
+  C = new PVector(width/4, height/2);
+  drawAxes();
+  drawTitles();
+}
+
+void draw() {
+  //fill(255); //resets the fill of points to white
+  if (mousePressed) {
+    increment = 0.006;
+  } else {
+    increment = 0.003;
+  }
+  if (t>2*PI) {
+    increment = 0;
+  }
+  t +=increment;
+  String curveChosen;
+  if (whichCurve < 0 || whichCurve > name.length) {
+    curveChosen = "default";
+  } else {
+
+    curveChosen = name[whichCurve];
+    //println(curveChosen);
+  }
+  fill(255, 255-255/(2*PI)*t, 0);
+  noStroke();
+  curve = new PolarCurvesList( curveChosen, t);
+  x = curve.getX();
+  y = curve.getY();
+  pushMatrix();
+  translate(O.x, O.y);
+  y= -y; //reorder the axes
+  ellipse(x, y, radiusPoint, radiusPoint );
+  drawVector();
+  popMatrix();
+
+  xC = curve.getXCartesian();
+  yC = curve.getYCartesian();
+  noStroke();
+  pushMatrix();
+  translate(C.x, C.y);
+  yC= -yC; //reorder the axes
+  //the if statement is so that it doesn't draw y=0 when in default mode
+  if(curveChosen == "default"){
+    ellipse(0, yC, radiusPoint, radiusPoint );
+  } else{
+  ellipse(xC, yC, radiusPoint, radiusPoint );
+  drawVectorCartesian();
+  }
+  popMatrix();
+}
+
+void drawVector() {
+  stroke(255, 50);
+  line(0, 0, x, y);
+}
+
+void drawVectorCartesian() {
+  stroke(255, 30);
+  line(xC, 0, xC, yC);
+}
+
+//draws buttons with types of curves
+void drawButtons(color colorBox, int selected) {
+
+  for (int i = 0; i < name.length; i++ ) {
+    fill(255);//resets the fill of rectangles to white
+    if(i == selected){
+      fill(colorBox);
+    }
+    float xButton =padding;
+    float yButton =  padding+(buttonHeight+padding)*i;
+    rect(xButton, yButton, buttonWidth, buttonHeight );
+    textFont(f, 16);                  // STEP 3 Specify font to be used
+    fill(0);                         // STEP 4 Specify font color 
+    text(name[i], xButton+buttonWidth/4, yButton+buttonHeight/1.5);   // STEP 5 Display Text
+  }
+}
+
+void mousePressed() {
+  float xButton =padding;
+  boolean isMouseXoverABox = (mouseX > xButton && mouseX <xButton+buttonWidth);
+  for (int i = 0; i < name.length; i++ ) {
+    float yButton =  padding+(buttonHeight+padding)*i;
+    boolean isMouseYoverABox = (mouseY > yButton && mouseY <yButton+buttonHeight);
+    if ( isMouseXoverABox && isMouseYoverABox) {
+      whichCurve = i;
+      //reset the graph
+      drawAxes();
+      t=0;
+      //highlight the button pressed
+      drawButtons(color(255,200,0), i);
+    }
+  }
+}
+
+void drawAxes() {
+  fill(0);
+  noStroke();
+  rect(width/4-10, height/20+height/15, width/4+width/2+10, height);
+  pushMatrix();
+  // draw graph -- center on origin
+  translate(O.x, O.y);
+  stroke(255);
+  // draw axes
+  line(-width/4+width/16, 0, width/4-width/16, 0);
+  line(0, height/3, 0, -height/3);
+  popMatrix();
+
+  //axes for cartesian plot
+  pushMatrix();
+  // draw graph -- center on origin
+  translate(C.x, C.y);
+  stroke(255);
+  // draw axes
+  line(0, 0, width/4, 0);
+  line(0, height/3, 0, -height/3);
+  popMatrix();
+}
+
+void drawTitles() {
+
+
+  fill(255);
+  float xButton =width/4+width/10;
+  float yButton =  padding;
+  float xButton2 = width/2+width/5;
+  float yButton2 =  padding;
+  rect(xButton, yButton, buttonWidth, buttonHeight );
+  rect(xButton2, yButton2, buttonWidth, buttonHeight );
+
+  textFont(f, 16);                  // STEP 3 Specify font to be used
+  fill(0);                         // STEP 4 Specify font color 
+  text("CARTESIAN", xButton+buttonWidth/8, yButton+buttonHeight/1.5);   // STEP 5 Display Text
+  text("POLAR", xButton2+buttonWidth/4, yButton2+buttonHeight/1.5);   // STEP 5 Display Text
+}
+
+class PolarCurvesList{
+  String Name;
+  float x,y;//coordinates of the point at time t, polar
+  float xC,yC;//coordinates of the point at time t, cartesian
+  float t; //parameter
+  int scaleRadius = 100;
+  
+  //contructor
+  PolarCurvesList(String name, float t1){
+    Name = name;
+    t=t1;
+    float r;
+    
+    switch(name){
+      case "cardioid": 
+      r = scaleRadius+scaleRadius*cos(t);
+      break;
+      
+      case "circleX":
+      r = 2*(scaleRadius*cos(t));
+      break;
+      
+      case "circleY":
+      r = 2*(scaleRadius*sin(t));
+      break;
+      
+      case "limacon":
+      r = (scaleRadius/2+scaleRadius*cos(t));
+      break;
+      
+      case "spiral":
+      r = scaleRadius/5*t;   
+      break;
+      
+      case "flower3":
+      r = scaleRadius*sin(3*t);      
+      break;
+      
+      case "flower7":
+      r = scaleRadius*sin(7*t);      
+      break;
+      
+      case "flowerX":
+      r = scaleRadius*sin(3*t/2);
+      break;
+      
+      default: 
+      r = 0;      
+      break;
+    }
+    
+
+    xC = 50*t;//to make the scale of the x axis not too small
+    yC = r;
+    x = r*cos(t);
+    y = r*sin(t);
+  }
+  
+  float getX(){
+    return x;
+  }
+  
+  float getY(){
+    return y;
+  }
+  
+    float getXCartesian(){
+    return xC;
+  }
+  
+  float getYCartesian(){
+    return yC;
+  }
+  
+}
