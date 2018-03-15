@@ -6,9 +6,11 @@ var padding = screenHeight/20;
 var buttonWidth = screenWidth / 10;
 var buttonHeight = screenHeight / 15;
 var t = 0;
-var increment = 0.003;
-var RadiusPoint = 6;
+var increment = 0.006;
+var radiusPoint = 4;
 var whichCurve = -1;
+
+var img = [];
 //var name = ["cardioid", "circleX"];
 //var name =[];// 
 //name[0] = "cardioid";
@@ -21,26 +23,37 @@ var whichCurve = -1;
 //}
 
 function setup() {
-  createCanvas(1280, 720);
+  canvas = createCanvas(1280, 720);
+canvas.position(50,130);
   O = createVector(width-width/4, height/2);
   C = createVector(width/4, height/2);
 background(0);
   drawAxes();
     drawTitles();
   drawButtons(255, -1);
+  img[0] = loadImage("cardioid.jpg");
+  img[1] = loadImage("circleX.jpg");
+  img[2] = loadImage("circleY.jpg");
+  img[3] = loadImage("limacon.jpg");
+  img[4] = loadImage("spiral.jpg");
+  img[5] = loadImage("flower3.jpg");
+  img[6] = loadImage("flower7.jpg");
+  img[7] = loadImage("flowerX.jpg");
+  //var img = [img_cardiod, img_circleX];
   //console.log(name);
   //create object Ball
   //B = new Ball(20, 20, 20);
 }
 
 function draw() {
+  //image(img, 0, height/2, img.width/2, img.height/2);
   var name = ["cardioid", "circleX", "circleY","limacon", "spiral", "flower3", "flower7", "flowerX"];
   //B.update(mouseX, mouseY);
   //B.display();
     if (mouseIsPressed) {
-    increment = 0.006;
+    increment = 0.008;
   } else {
-    increment = 0.003;
+    increment = 0.006;
   }
     if (t>2*PI) {
     increment = 0;
@@ -56,11 +69,16 @@ function draw() {
   }
   //var curveChosen = "cardioid";
   fill(255, 255-255/(2*PI)*t, 0);
+  //if((t> PI-increment && t < PI+increment*8) || (t> PI/2-increment && t < PI/2+increment*3)|| (t> 3*PI/2-increment && t < 3*PI/2+increment*3)) {
+    //fill(0);
+  //} else {
+  //fill(255, 255-255/(2*PI)*t, 0);
+  //}
   noStroke();
   curve = new PolarCurvesList( curveChosen);
   curve.update(t);
   //curve.display();
-  var radiusPoint = 6;
+  
   push();
   translate(O.x, O.y);
   ellipse(curve.x, -curve.y, radiusPoint, radiusPoint );
@@ -80,12 +98,36 @@ function draw() {
 }
 
 function drawVector() {
-  stroke(255, 50);
+  
+  if(t> PI/2-increment*3 && t < PI/2+increment*3){
+    //stroke(155, 40, 10);
+    stroke(51, 150, 255);
+    //maybe draw a thin rectangle instead of a line
+  } else if(t> PI-increment*3 && t < PI+increment*3) {
+    stroke(51, 150, 255);
+  } else if(t> 3*PI/2-increment*3 && t < 3*PI/2+increment*3) {
+    stroke(51, 150, 255);
+  } else {
+    stroke(255, 40);
+  }
+  //stroke(100, 255-255/(2*PI)*t, 0);
   line(0, 0, curve.x, -curve.y);
 }
 
 function drawVectorCartesian() {
-  stroke(255, 30);
+    if(t> PI/2-increment*3 && t < PI/2+increment*3){
+    //stroke(155, 40, 10);
+    stroke(51, 150, 255);
+    //maybe draw a thin rectangle instead of a line
+  } else if(t> PI-increment*3 && t < PI+increment*3) {
+    //stroke(155, 40, 10);
+    stroke(51, 150, 255);
+  } else if(t> 3*PI/2-increment*3 && t < 3*PI/2+increment*3) {
+    //stroke(155, 40, 10);
+    stroke(51, 150, 255);
+  } else {
+    stroke(255, 40);
+  }
   line(curve.xC, 0, curve.xC, -curve.yC);
 }
 
@@ -211,6 +253,7 @@ function mousePressed() {
       t=0;
       //highlight the button pressed
       drawButtons(color(255,200,0), i);
+      image(img[i], xButton+buttonWidth+2, yButton, buttonWidth, buttonHeight);
     }
   }
 }
